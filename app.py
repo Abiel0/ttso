@@ -76,4 +76,6 @@ def internal_error(error):
     logger.error(f"Internal server error: {str(error)}", exc_info=True)
     return jsonify({"error": "Internal server error"}), 500
 
-# Remove the if __name__ == '__main__' block for Vercel deployment
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
