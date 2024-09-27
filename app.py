@@ -13,25 +13,17 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-# Initialize the client
-try:
-    client = Client("OpenSound/EzAudio")
-    logger.info("Gradio client initialized successfully")
-except Exception as e:
-    logger.error(f"Failed to initialize Gradio client: {str(e)}", exc_info=True)
-    client = None
-
 @app.route('/', methods=['GET'])
 def index():
     return send_file('index.html')
 
 @app.route('/generate_audio', methods=['POST'])
 def generate_audio():
-    if client is None:
-        logger.error("Gradio client is not initialized")
-        return jsonify({"error": "Service is not available"}), 503
-
     try:
+        # Initialize the client within the route
+        client = Client("OpenSound/EzAudio")
+        logger.info("Gradio client initialized successfully")
+
         data = request.json
         text = data.get('text', '')
 
@@ -63,6 +55,7 @@ def generate_audio():
         os.remove(result)
 
         return jsonify({"audio": encoded_audio})
+
     except Exception as e:
         logger.error(f"Error generating audio: {str(e)}", exc_info=True)
         return jsonify({"error": "An error occurred while generating the audio. Please check server logs for details."}), 500
